@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JWT Token Example</title>
+</head>
+<body>
+    <button id="fetchDataButton">Fetch Data</button>
+    <div id="dataDisplay"></div>
+
+    <script>
+        // 获取JWT token并发送请求
+        document.getElementById('fetchDataButton').addEventListener('click', () => {
+            // 发送第一个请求，获取JWT token
+            fetch('http://localhost:3000/user/login', {
+                method: 'POST',
+                body: JSON.stringify({ username: 'linlin', password: '123456' }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(data => {
+                // 处理第一个请求的响应
+                // 获取JWT token从响应头中
+                const jwtToken = data.headers.get('token');
+
+
+                // 发送第二个请求，将JWT token作为Authorization头的值携带
+                fetch('http://localhost:3000/aaa', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`
+                    }
+                })
+                .then(response => response.json())
+                .then(protectedData => {
+                    // 处理第二个请求的响应
+                    document.getElementById('dataDisplay').textContent = JSON.stringify(protectedData, null, 2);
+                })
+                .catch(error => {
+                    console.error('Error fetching protected data:', error);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching JWT token:', error);
+            });
+        });
+    </script>
+</body>
+</html>
