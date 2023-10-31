@@ -1,16 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectEntityManager } from '@nestjs/typeorm';
-import { EntityManager } from 'typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Permission } from './entities/permission.entity';
 import { Role } from './entities/role.entity';
 import { User } from './entities/user.entity';
+import { UserLoginDto } from './dto/user-login.dto';
 
 @Injectable()
 export class UserService {
   @InjectEntityManager()
   private readonly entityManager: EntityManager;
+  @InjectRepository(User)
+  private readonly userRepository: Repository<User>;
 
   async initData() {
     const user1 = new User();
@@ -86,6 +89,20 @@ export class UserService {
     await this.entityManager.save(Role, [role1, role2]);
 
     await this.entityManager.save(User, [user1, user2]);
+  }
+
+  async login(user: UserLoginDto) {
+    const fountUser = await this.userRepository.findOne({
+      where: { username: user.username },
+      relations: ['roles'],
+    });
+    if (!fountUser) {
+      throw new HttpException('用户不存在', 404);
+    }
+    if (fountUser.password !== user.password) {
+      throw new HttpException('密码错误', 400);
+    }
+    return fountUser;
   }
 
   create(createUserDto: CreateUserDto) {

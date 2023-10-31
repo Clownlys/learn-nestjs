@@ -3,6 +3,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
+import { JwtModule } from '@nestjs/jwt';
+import { AaaModule } from './aaa/aaa.module';
+import { BbbModule } from './bbb/bbb.module';
+import { APP_GUARD } from '@nestjs/core';
+import { LoginGuard } from './login.guard';
 
 @Module({
   imports: [
@@ -22,9 +27,22 @@ import { UserModule } from './user/user.module';
         authPlugin: 'sha256_password',
       },
     }),
+    JwtModule.register({
+      global: true,
+      secret: 'linlin',
+      signOptions: { expiresIn: '1d' },
+    }),
     UserModule,
+    AaaModule,
+    BbbModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: LoginGuard,
+    },
+  ],
 })
 export class AppModule {}
