@@ -3,6 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
+import { AaaModule } from './aaa/aaa.module';
+import { BbbModule } from './bbb/bbb.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { UserModule } from './user/user.module';
       },
     }),
     UserModule,
+    AaaModule,
+    BbbModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],

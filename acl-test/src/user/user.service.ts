@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 import { Permission } from './entities/permission.entity';
 import { User } from './entities/user.entity';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Injectable()
 export class UserService {
@@ -67,23 +66,29 @@ export class UserService {
     await this.entityManager.save([user1, user2]);
   }
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async login(user: LoginUserDto) {
+    const foundUser = await this.entityManager.findOne(User, {
+      where: { username: user.username },
+      relations: ['permissions'],
+    });
+    if (!foundUser) {
+      throw new HttpException('用户不存在', HttpStatus.ACCEPTED);
+    }
+    if (foundUser.password !== user.password) {
+      throw new HttpException('密码错误', HttpStatus.ACCEPTED);
+    }
+    return user;
   }
 
-  findAll() {
-    return `This action returns all user`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async findByUsername(username: string) {
+    const user = this.entityManager.findOne(User, {
+      where: {
+        username,
+      },
+      relations: {
+        permissions: true,
+      },
+    });
+    return user;
   }
 }

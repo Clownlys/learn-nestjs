@@ -1,0 +1,28 @@
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { Request } from 'express';
+import { Observable } from 'rxjs';
+declare module 'express-session' {
+  interface Session {
+    user: {
+      username: string;
+    };
+  }
+}
+@Injectable()
+export class LoginGuard implements CanActivate {
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const request = context.switchToHttp().getRequest<Request>();
+    console.log('LoginGuard');
+    if (!request.session.user) {
+      throw new UnauthorizedException('请先登录');
+    }
+    return true;
+  }
+}
