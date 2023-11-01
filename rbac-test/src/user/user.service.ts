@@ -2,7 +2,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import { Permission } from './entities/permission.entity';
 import { Role } from './entities/role.entity';
 import { User } from './entities/user.entity';
@@ -103,6 +103,13 @@ export class UserService {
       throw new HttpException('密码错误', 400);
     }
     return fountUser;
+  }
+
+  async findRolesByIds(ids: number[]) {
+    return await this.entityManager.find(Role, {
+      where: { id: In(ids) },
+      relations: ['permissions'],
+    });
   }
 
   create(createUserDto: CreateUserDto) {

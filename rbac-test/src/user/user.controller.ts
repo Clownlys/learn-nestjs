@@ -37,7 +37,7 @@ export class UserController {
     const payload = {
       user: {
         username: foundUser.username,
-        role: foundUser.roles,
+        roles: foundUser.roles,
       },
     };
     const token = this.jwtService.sign(payload);
